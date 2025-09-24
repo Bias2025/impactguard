@@ -392,7 +392,7 @@ def log_attack(target_kind, target_id, mode, prompt, response, evaluation, times
     }
 
 def generate_comprehensive_report(results, target_kind, target_id, mode, config):
-    """Generate detailed security assessment report"""
+    """Generate detailed security assessment report with ImpactGuard branding"""
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     buckets, pct, total, avg_score = aggregate(results)
     
@@ -400,7 +400,22 @@ def generate_comprehensive_report(results, target_kind, target_id, mode, config)
     refusal_rate = sum(1 for r in results if r.get("refusal_detected", False)) / total * 100 if total > 0 else 0
     attack_success_rate = sum(1 for r in results if not r["pass"]) / total * 100 if total > 0 else 0
     
-    report = f"""# ImpactGuard Security Assessment Report
+    report = f"""
+<div align="center">
+
+```
+🛡️ ImpactGuard
+By HCLTech
+
+Supercharging progress in AI Ethics and
+Governance – GENAI
+```
+
+# Security Assessment Report
+
+**🔒 CONFIDENTIAL SECURITY ASSESSMENT**
+
+</div>
 
 **Generated:** {timestamp}  
 **Assessment ID:** IG-{datetime.now().strftime('%Y%m%d-%H%M%S')}  
@@ -536,6 +551,28 @@ This assessment was conducted using automated red-team techniques and should be 
 
 **Classification:** Internal Use Only  
 **Next Review Date:** {(datetime.now().replace(month=datetime.now().month+3) if datetime.now().month <= 9 else datetime.now().replace(year=datetime.now().year+1, month=(datetime.now().month+3-12))).strftime('%Y-%m-%d')}
+
+---
+
+<div align="center">
+
+```
+🛡️ ImpactGuard
+By HCLTech
+
+Supercharging progress in AI Ethics and
+Governance – GENAI
+```
+
+*Advanced AI Red-Team Orchestration Platform*
+
+**Secure by Design** | **AI-Powered** | **Continuous Monitoring**
+
+---
+
+*This report contains confidential security information. Distribution should be limited to authorized personnel only.*
+
+</div>
 """
     
     return report
@@ -618,9 +655,64 @@ if st.session_state.attack_logs:
     st.sidebar.metric("Successful Breaches", successful_attacks, delta=f"{successful_attacks/total_attacks*100:.1f}%" if total_attacks > 0 else "0%")
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Main UI Header
+# Main UI Header with Logo
 # ──────────────────────────────────────────────────────────────────────────────
-st.title("🛡️ ImpactGuard")
+
+# Create logo and header layout
+header_col1, header_col2 = st.columns([1, 4])
+
+with header_col1:
+    # Display official ImpactGuard logo
+    st.markdown("""
+    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+        <svg width="80" height="60" viewBox="0 0 80 60" xmlns="http://www.w3.org/2000/svg">
+            <!-- Official ImpactGuard Shield Logo -->
+            <defs>
+                <linearGradient id="shieldBg" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#1e3a8a;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            
+            <!-- Main shield body -->
+            <path d="M25 8 L55 8 C57 8 58 9 58 11 L58 30 C58 40 41.5 50 41.5 50 C41.5 50 25 40 25 30 L25 11 C25 9 26 8 25 8 Z" 
+                  fill="url(#shieldBg)" 
+                  stroke="#1e3a8a" 
+                  stroke-width="2"/>
+                  
+            <!-- Inner shield accent -->
+            <path d="M29 12 L54 12 C55 12 55 13 55 14 L55 28 C55 36 41.5 44 41.5 44 C41.5 44 29 36 29 28 L29 14 C29 13 29 12 29 12 Z" 
+                  fill="#2563eb" 
+                  opacity="0.8"/>
+                  
+            <!-- Security check symbol -->
+            <circle cx="41.5" cy="25" r="8" fill="white" opacity="0.9"/>
+            <path d="M37 25 L40 28 L47 21" 
+                  stroke="#1e3a8a" 
+                  stroke-width="2.5" 
+                  fill="none" 
+                  stroke-linecap="round" 
+                  stroke-linejoin="round"/>
+        </svg>
+    </div>
+    """, unsafe_allow_html=True)
+
+with header_col2:
+    st.markdown("""
+    <div style="margin-left: 15px;">
+        <h1 style="margin: 0; color: #1e40af; font-size: 2.5rem; font-weight: 700;">
+            ImpactGuard
+        </h1>
+        <p style="margin: 0; color: #64748b; font-size: 1.1rem; font-weight: 500;">
+            by HCLTech
+        </p>
+        <p style="margin: 5px 0 0 0; color: #64748b; font-size: 0.9rem;">
+            Supercharging progress in AI Ethics and Governance – GENAI
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
 st.caption("Advanced AI Red-Team Orchestration Platform | Poe API generates adversarial prompts for external target system testing")
 
 # Display current configuration
