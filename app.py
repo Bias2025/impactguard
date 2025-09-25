@@ -609,7 +609,7 @@ st.sidebar.divider()
 
 mode_key = st.sidebar.selectbox("Attack Mode", options=[k for k,_ in MODES], format_func=lambda k: dict(MODES)[k], index=1)
 level = st.sidebar.number_input("Intensity Level (prompts = 2^n)", min_value=1, max_value=5, value=1, step=1, 
-                               help=f"Level {st.sidebar.number_input('Intensity Level (prompts = 2^n)', min_value=1, max_value=5, value=1, step=1) if 'level' not in locals() else level} = {level_to_prompt_count(level if 'level' in locals() else 1)} attack prompts")
+                               help=f"Generates {level_to_prompt_count(1)} attack prompts at level 1, {level_to_prompt_count(2)} at level 2, etc.")
 
 st.sidebar.divider()
 
