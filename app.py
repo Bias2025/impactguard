@@ -10,6 +10,8 @@ import pandas as pd
 import plotly.express as px
 from datetime import datetime
 import io
+import streamlit.components.v1 as components
+
 
 st.set_page_config(page_title="ImpactGuard (Enhanced)", layout="wide")
 
@@ -409,7 +411,7 @@ def generate_comprehensive_report(results, target_kind, target_id, mode, config)
 <div align="center">
 
 ```
-🛡️ ImpactGuard
+ ImpactGuard
 By HCLTech
 
 Supercharging progress in AI Ethics and
@@ -659,40 +661,27 @@ if st.session_state.get("attack_logs", []):
 header_col1, header_col2 = st.columns([1, 4])
 
 with header_col1:
-    # Display official ImpactGuard logo
-    st.markdown("""
-    <div style="display: flex; align-items: center; margin-bottom: 20px;">
-        <svg width="80" height="60" viewBox="0 0 80 60" xmlns="http://www.w3.org/2000/svg">
-            <!-- Official ImpactGuard Shield Logo -->
-            <defs>
-                <linearGradient id="shieldBg" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#1e3a8a;stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
-                </linearGradient>
-            </defs>
-            
-            <!-- Main shield body -->
-            <path d="M25 8 L55 8 C57 8 58 9 58 11 L58 30 C58 40 41.5 50 41.5 50 C41.5 50 25 40 25 30 L25 11 C25 9 26 8 25 8 Z" 
-                  fill="url(#shieldBg)" 
-                  stroke="#1e3a8a" 
-                  stroke-width="2"/>
-                  
-            <!-- Inner shield accent -->
-            <path d="M29 12 L54 12 C55 12 55 13 55 14 L55 28 C55 36 41.5 44 41.5 44 C41.5 44 29 36 29 28 L29 14 C29 13 29 12 29 12 Z" 
-                  fill="#2563eb" 
-                  opacity="0.8"/>
-                  
-            <!-- Security check symbol -->
-            <circle cx="41.5" cy="25" r="8" fill="white" opacity="0.9"/>
-            <path d="M37 25 L40 28 L47 21" 
-                  stroke="#1e3a8a" 
-                  stroke-width="2.5" 
-                  fill="none" 
-                  stroke-linecap="round" 
-                  stroke-linejoin="round"/>
-        </svg>
+    logo_html = """
+    <div style="display:flex;align-items:center;margin-bottom:20px;">
+      <svg width="80" height="60" viewBox="0 0 80 60" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="shieldBg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#1e3a8a;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <path d="M25 8 L55 8 C57 8 58 9 58 11 L58 30 C58 40 41.5 50 41.5 50 C41.5 50 25 40 25 30 L25 11 C25 9 26 8 25 8 Z"
+              fill="url(#shieldBg)" stroke="#1e3a8a" stroke-width="2"/>
+        <path d="M29 12 L54 12 C55 12 55 13 55 14 L55 28 C55 36 41.5 44 41.5 44 C41.5 44 29 36 29 28 L29 14 C29 13 29 12 29 12 Z"
+              fill="#2563eb" opacity="0.8"/>
+        <circle cx="41.5" cy="25" r="8" fill="white" opacity="0.9"/>
+        <path d="M37 25 L40 28 L47 21" stroke="#1e3a8a" stroke-width="2.5" fill="none"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
     </div>
-    """, unsafe_allow_html=True)
+    """
+    components.html(logo_html, height=90)   # isolates SVG; prevents the TypeError
+
 
 with header_col2:
     st.markdown("""
