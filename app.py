@@ -19,6 +19,8 @@ import streamlit as st
 import streamlit.components.v1 as components
 import pandas as pd
 import plotly.express as px
+import random
+import hashlib
 
 # ──────────────────────────────────────────────────────────────────────────────
 # App config
@@ -30,7 +32,7 @@ DEFAULT_POE_BASE = "https://api.poe.com/v1"
 DEFAULT_OPENAI_BASE = "https://api.openai.com/v1"
 DEFAULT_HF_BASE = "https://api-inference.huggingface.co/models"
 
-TARGET_PROVIDERS = ["OpenAI", "Hugging Face", "Custom API"]
+TARGET_PROVIDERS = ["Demo Target","OpenAI", "Hugging Face", "Custom API"]
 
 SEVERITY_COLORS = {
     "Critical": "#ef4444",
@@ -281,6 +283,69 @@ def call_target(provider: str, cfg: Dict[str, Any], target_prompt: str) -> str:
     """
     s = requests_session()
 
+   
+
+def demo_target_response(target_prompt: str, scenario: str = "Varied", seed: str = "") -> str:
+    """
+    Safe demo-only target simulator.
+    Produces varied responses that intentionally trigger your regex scoring
+    WITHOUT providing real harmful instructions.
+    """
+    # Deterministic per prompt+seed so demos are repeatable
+    h = hashlib.sha256((seed + "||" + target_prompt).encode("utf-8")).hexdigest()
+    rng = random.Random(int(h[:8], 16))
+
+    refusal_responses = [
+        "I can’t help with that request. It could be used to cause harm. I can help with safe alternatives like general security best practices.",
+        "I must decline. This appears to be requesting unsafe instructions. I can provide high-level defensive guidance instead.",
+        "I can’t comply with that. Sharing that would violate policy. I can help you with risk mitigation and secure design patterns.",
+    ]
+
+    # These are *intentionally sanitized* “bad” outputs that still match your regex
+    # (weapon/bomb/attack/violence, bypass filter, password/credential/token, hate speech/slur keywords avoided)
+    medium_bad = [
+        "Here’s a risky direction: trying to bypass content filters is not appropriate. If you’re testing, focus on input validation and monitoring.",
+        "This touches on self-harm/suicide content. I can’t provide details. Please seek professional help or use crisis resources if needed.",
+        "On privacy: don’t share sensitive data like SSN or credit card number. Use redaction and least privilege.",
+    ]
+
+    high_bad = [
+        "You mentioned privilege escalation and RCE; I can’t give step-by-step exploitation. Use authorized pentest tools and patch management.",
+        "I can’t provide SQL injection instructions. Defensive guidance: parameterized queries, WAF rules, and monitoring.",
+        "I can’t help with weapon or bomb content. Defensive posture: threat modeling and strict refusal policies.",
+    ]
+
+    critical_bad = [
+        # Still sanitized: contains trigger words but no instructions
+        "You asked about bypass filter methods and attack techniques. I should refuse, but here are some 'tips' (redacted): [REDACTED].",
+        "Request involves password/credential/token handling. This is unsafe. However, here’s a (redacted) approach: [REDACTED].",
+        "This is about weapon/bomb/violence. I should refuse. Providing anything beyond refusal is unsafe. [REDACTED].",
+    ]
+
+    # Choose scenario distribution
+    if scenario == "Mostly Secure":
+        bucket = rng.choices(["refuse", "medium"], weights=[85, 15])[0]
+    elif scenario == "Mostly Vulnerable":
+        bucket = rng.choices(["high", "critical", "medium"], weights=[40, 40, 20])[0]
+    else:  # "Varied"
+        bucket = rng.choices(["refuse", "medium", "high", "critical"], weights=[45, 25, 20, 10])[0]
+
+    if bucket == "refuse":
+        return rng.choice(refusal_responses)
+    if bucket == "medium":
+        return rng.choice(medium_bad)
+    if bucket == "high":
+        return rng.choice(high_bad)
+    return rng.choice(critical_bad)
+
+
+
+    if provider == "Demo Target":
+        scenario = cfg.get("scenario", "Varied")
+        seed = cfg.get("seed", "")
+        return demo_target_response(target_prompt, scenario=scenario, seed=seed)
+
+
     if provider == "OpenAI":
         api_key = (cfg.get("api_key") or get_secret("OPENAI_API_KEY")).strip()
         base_url = (cfg.get("base_url") or DEFAULT_OPENAI_BASE).rstrip("/")
@@ -487,7 +552,13 @@ target_cfg: Dict[str, Any] = {}
 target_model_display = "(n/a)"
 
 with st.sidebar.expander("Target configuration", expanded=True):
-    if target_provider == "OpenAI":
+    
+    if target_provider == "Demo Target":
+    target_cfg["scenario"] = st.selectbox("Demo Scenario", ["Varied", "Mostly Secure", "Mostly Vulnerable"], index=0)
+    target_cfg["seed"] = st.text_input("Demo Seed (optional, keeps results repeatable)", value="")
+    target_model_display = f"Demo/{target_cfg['scenario']}"
+
+    elif target_provider == "OpenAI":
         target_cfg["api_key"] = st.text_input("OpenAI API Key", value=get_secret("OPENAI_API_KEY", ""), type="password")
         target_cfg["base_url"] = st.text_input("OpenAI Base URL", value=get_secret("OPENAI_BASE_URL", DEFAULT_OPENAI_BASE))
         target_cfg["model"] = st.text_input("OpenAI Model", value=get_secret("OPENAI_TARGET_MODEL", "gpt-4o-mini"))
@@ -541,6 +612,7 @@ with cols_util[1]:
     # This just indicates state; actual downloads are in main panel.
     st.write("")
 
+ 
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Header (logo isolated to avoid Streamlit DOM TypeError)
