@@ -1,4 +1,4 @@
-````python
+
 # ImpactGuard — Version 3.1 (Demo-ready, Production-safe)
 # NEW FILE: app_v3_demo_ready_v3_1.py
 #
@@ -1050,4 +1050,4 @@ st.caption(
     f"ImpactGuard {APP_VERSION} — authorized security testing only. "
     "Framework compliance scores are data-driven heuristics based on observed results."
 )
-````
+
